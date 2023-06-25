@@ -1,0 +1,26 @@
+# Packet Capture
+A simple way to check if the filter is working is to check if global counters are increasing if a new session is initiated:
+>show counter global filter delta yes packet-filter yes
+And no counters are displayed.
+
+'delta yes' indicates I want to view counters that have incremented since the last time I executed this command.
+'packet-filter yes' indicates I want to see only global counters that match my filters.
+
+Next, configure the stages—there are 4:
+
+- drop stage is where packets get discarded. The reasons may vary and, for this part, the global counters may help identify if the drop was due to a policy deny, a detected threat, or something else.
+- receive stage captures the packets as they ingress the firewall before they go into the firewall engine. When NAT is configured, these packets will be pre-NAT.
+- transmit stage captures packets how they egress out of the firewall engine. If NAT is configured, these will be post-NAT.
+- firewall stage captures packets in the firewall stage.
+
+
+> show session all 
+> clear session id <id#>
+> debug dataplane packet-diag set capture on 
+> debug dataplane packet-diag set capture off 
+> debug dataplane packet-diag clear filter-marked-session all
+
+After you download the pcaps, you may need to merge the transmit and receive files together:
+
+The receive stage will have the client's private IP to the webserver public IP, and the returning packet from the web server public IP  to the firewall external IP (receive stage is pre-NAT).
+The transmit stage will have the firewall external IP (client NAT) to the server public IP, and the returning public IP to the client private IP.
